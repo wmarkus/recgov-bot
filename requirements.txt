@@ -1,0 +1,28 @@
+# Core dependencies
+playwright>=1.40.0
+httpx>=0.25.0
+pyyaml>=6.0
+pydantic>=2.0.0
+python-dateutil>=2.8.0
+
+# Scheduling and timing
+apscheduler>=3.10.0
+
+# Notifications
+sendgrid>=6.10.0  # Email
+twilio>=8.0.0     # SMS (optional)
+
+# Session management
+browser-cookie3>=0.19.0
+requests>=2.31.0
+
+# CLI
+click>=8.1.0
+rich>=13.0.0
+
+# Development
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
+
+# Optional: CAPTCHA solving
+# 2captcha-python>=1.2.0

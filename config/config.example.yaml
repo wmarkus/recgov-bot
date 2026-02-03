@@ -1,0 +1,129 @@
+# Recreation.gov Campsite Sniper Configuration
+# Copy this to config.yaml and fill in your details
+
+credentials:
+  email: "your-email@example.com"
+  password: "your-password"
+  
+target:
+  # Find these from recreation.gov URLs
+  # Example: https://www.recreation.gov/camping/campgrounds/232447 -> campground_id = 232447
+  campground_id: "232447"  # Upper Pines, Yosemite Valley
+  
+  # Specific campsites in priority order (optional)
+  # Leave empty to try any available site
+  campsite_ids: 
+    - "42"
+    - "38"
+    - "15"
+    - "22"
+  
+  # Trip dates
+  arrival_date: "2025-08-15"
+  departure_date: "2025-08-17"
+  
+  # Number of people
+  num_people: 2
+  
+  # Equipment type (optional)
+  # Options: "tent", "rv", "trailer", etc.
+  equipment: "tent"
+
+schedule:
+  # When the reservation window opens
+  # Most campgrounds: 7:00 AM PT on rolling 6-month window
+  # Format: "YYYY-MM-DD HH:MM:SS" in your local timezone
+  window_opens: "2025-02-15 07:00:00"
+  timezone: "America/Los_Angeles"
+  
+  # How early to start preparing (seconds before window)
+  prep_time: 300  # 5 minutes
+  
+  # How many milliseconds before window to start submitting
+  # Slight negative values attempt submission just before window
+  early_start_ms: -100
+
+notifications:
+  # At least one notification method required
+  email:
+    enabled: true
+    address: "your-email@example.com"
+    # Using SendGrid
+    sendgrid_api_key: "SG.your-api-key"
+    
+  sms:
+    enabled: false
+    phone: "+1234567890"
+    # Using Twilio
+    twilio_account_sid: "your-account-sid"
+    twilio_auth_token: "your-auth-token"
+    twilio_from_number: "+1098765432"
+    
+  # Webhook for custom integrations (Slack, Discord, etc.)
+  webhook:
+    enabled: false
+    url: "https://hooks.slack.com/services/..."
+
+browser:
+  # Browser automation settings
+  headless: false  # Set true to run without visible browser
+  slow_mo: 50      # Milliseconds between actions (helps avoid detection)
+  
+  # User agent (mimics real browser)
+  user_agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+  
+  # Session persistence
+  save_session: true
+  session_file: "session.json"
+  
+  # Handoff settings
+  handoff_method: "url"  # Options: "url", "cookies", "remote"
+  # For remote browser access (advanced)
+  # remote_debugging_port: 9222
+
+api:
+  # Direct API settings
+  base_url: "https://www.recreation.gov"
+  
+  # Request settings
+  timeout: 10  # seconds
+  max_retries: 3
+  retry_delay: 0.5  # seconds
+  
+  # Rate limiting (be respectful)
+  requests_per_second: 2
+  
+  # Headers to mimic browser
+  headers:
+    Accept: "application/json, text/plain, */*"
+    Accept-Language: "en-US,en;q=0.9"
+    Origin: "https://www.recreation.gov"
+    Referer: "https://www.recreation.gov/"
+
+retry:
+  # How many times to attempt reservation
+  max_attempts: 10
+  
+  # Delay between attempts (milliseconds)
+  attempt_delay_ms: 100
+  
+  # Whether to try backup campsites
+  use_fallback_sites: true
+  
+  # Stop after first successful add-to-cart
+  stop_on_success: true
+
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  file: "recgov-bot.log"
+  
+advanced:
+  # CAPTCHA handling
+  # Options: "pause" (wait for user), "service" (use solving service)
+  captcha_handling: "pause"
+  
+  # 2Captcha API key (if using service)
+  # captcha_api_key: "your-2captcha-key"
+  
+  # Proxy settings (optional)
+  # proxy: "http://user:pass@proxy:8080"
