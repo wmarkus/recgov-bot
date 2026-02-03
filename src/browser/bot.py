@@ -20,7 +20,7 @@ from playwright.async_api import (
 )
 
 from .session import BrowserSession, SessionHandoff
-from ..api.endpoints import WebPages
+from .urls import WebPages
 from ..common.models import (
     Campground,
     Campsite,

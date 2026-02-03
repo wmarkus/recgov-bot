@@ -4,7 +4,7 @@ Recreation.gov Campsite Sniper Bot - Main Entry Point
 
 Usage:
     python main.py browser --config config/config.yaml [--test|--now|--schedule]
-    python main.py api --config config/config.yaml [--check|--reserve]
+    python main.py legacy-api --config config/config.yaml [--check|--reserve]
 """
 import asyncio
 import logging
@@ -201,17 +201,21 @@ def browser_schedule(ctx):
         console.print("\n[yellow]Cancelled[/yellow]")
 
 
-@cli.group()
-def api():
-    """Direct API mode (faster but less reliable)"""
-    pass
+@cli.group("legacy-api")
+def legacy_api():
+    """Legacy direct API mode (not recommended)"""
+    console.print(Panel(
+        "⚠️ Legacy API mode is deprecated and may break without notice.\n"
+        "Use browser mode for the supported flow.",
+        style="yellow"
+    ))
 
 
-@api.command("check")
+@legacy_api.command("check")
 @click.pass_context
 def api_check(ctx):
     """Check campsite availability via API"""
-    from src.api import RecGovAPIClient
+    from src.legacy.api import RecGovAPIClient
     
     cfg = ctx.obj["config"]
     
@@ -253,11 +257,11 @@ def api_check(ctx):
     asyncio.run(run())
 
 
-@api.command("reserve")
+@legacy_api.command("reserve")
 @click.pass_context
 def api_reserve(ctx):
     """Attempt reservation via API"""
-    from src.api import RecGovAPIClient
+    from src.legacy.api import RecGovAPIClient
     
     cfg = ctx.obj["config"]
     

@@ -16,11 +16,11 @@ Uses Playwright to automate a real browser session. More reliable but slower.
 - Works with CAPTCHAs (pauses for human intervention)
 - Seamless session handoff to user
 
-### 2. Direct API (`src/api/`)
+### 2. Direct API (Legacy, `src/legacy/api/`)
 Uses reverse-engineered API endpoints. Faster but more fragile.
 - Sub-second reservation attempts
 - May break if Recreation.gov changes their API
-- Requires more maintenance
+- Deprecated in favor of browser automation
 
 ## Project Structure
 
@@ -30,11 +30,12 @@ recgov-bot/
 │   ├── browser/           # Playwright-based automation
 │   │   ├── bot.py         # Main browser bot
 │   │   ├── session.py     # Session management
-│   │   └── handoff.py     # User handoff utilities
-│   ├── api/               # Direct API approach
-│   │   ├── client.py      # API client
-│   │   ├── endpoints.py   # Known API endpoints
-│   │   └── auth.py        # Authentication handling
+│   │   └── urls.py        # Browser URL helpers
+│   ├── legacy/            # Parked legacy modules
+│   │   └── api/           # Direct API approach (deprecated)
+│   │       ├── client.py  # API client
+│   │       ├── endpoints.py # Known API endpoints
+│   │       └── auth.py    # Authentication handling
 │   └── common/            # Shared utilities
 │       ├── config.py      # Configuration management
 │       ├── notifications.py # SMS/Email alerts
@@ -72,7 +73,7 @@ credentials:
 
 target:
   campground_id: "232447"  # Upper Pines, Yosemite
-  campsite_ids: ["42", "38", "15"]  # Priority order
+  campsite_ids: ["42", "38", "15"]  # Numeric IDs only (priority order)
   arrival_date: "2025-08-15"
   departure_date: "2025-08-17"
   
@@ -87,23 +88,23 @@ notifications:
 
 ```bash
 # Test run (checks availability only)
-python -m src.browser.bot --test
+python main.py browser test
 
 # Schedule for window opening
-python -m src.browser.bot --schedule "2025-02-15 07:00:00"
+python main.py browser schedule
 
 # Run immediately
-python -m src.browser.bot --now
+python main.py browser now
 ```
 
-### Direct API
+### Direct API (Legacy)
 
 ```bash
 # Check availability via API
-python -m src.api.client --check
+python main.py legacy-api check
 
 # Attempt reservation via API
-python -m src.api.client --reserve --schedule "2025-02-15 07:00:00"
+python main.py legacy-api reserve
 ```
 
 ## How It Works
@@ -124,6 +125,7 @@ python -m src.api.client --reserve --schedule "2025-02-15 07:00:00"
 3. URL will look like: `https://www.recreation.gov/camping/campgrounds/232447`
 4. The number at the end (`232447`) is the campground ID
 5. For specific campsites, click on one - URL shows `/campsites/12345`
+6. Use numeric campsite IDs only in config (names are not resolved)
 
 ## API Endpoints (Reverse-Engineered)
 

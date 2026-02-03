@@ -8,10 +8,10 @@ Two approaches for automated campsite reservations:
    - More reliable, handles JavaScript
    - Supports CAPTCHA pause for human intervention
    
-2. Direct API (src.api)
+2. Direct API (src.legacy.api)
    - Uses reverse-engineered REST endpoints
    - Faster but more fragile
-   - May break if Recreation.gov changes their API
+   - Deprecated in favor of browser automation
 """
 from .common.config import Config, load_config
 

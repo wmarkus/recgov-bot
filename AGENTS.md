@@ -90,7 +90,7 @@ The `tests/` directory is currently empty. When adding tests:
 
 ### Error Handling
 - Browser: Gracefully handles CAPTCHA, session expiration, network errors
-- API: Raises `APIError` with status codes; may need to fall back to browser mode
+- API (legacy): Raises `APIError` with status codes; may need to fall back to browser mode
 - Both: Implement retry logic with exponential backoff in `RetryStrategy`
 
 ## Code Patterns
@@ -98,7 +98,7 @@ The `tests/` directory is currently empty. When adding tests:
 ### Async/Await Convention
 All I/O operations are async. Use:
 - `async with RecGovBrowserBot(config) as bot:` for browser automation
-- `async with RecGovAPIClient(config) as client:` for API calls
+- `async with RecGovAPIClient(config) as client:` for legacy API calls
 - `await scheduler.wait_until(target_time)` for precision timing
 - `async with rate_limiter:` for API rate limiting
 
@@ -132,8 +132,8 @@ Main CLI configures Rich logging with tracebacks.
 - `bot.py`: Main `RecGovBrowserBot` class, implements full reservation flow
 - `session.py`: Session persistence, cookie/storage management, handoff methods
 
-### `src/api/`
-- `client.py`: `RecGovAPIClient` for direct HTTP requests
+### `src/legacy/api/`
+- `client.py`: `RecGovAPIClient` for direct HTTP requests (deprecated)
 - `endpoints.py`: API endpoint definitions (reverse-engineered)
 - `auth.py`: Authentication handling, token management
 

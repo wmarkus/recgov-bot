@@ -7,16 +7,14 @@ credentials:
   
 target:
   # Find these from recreation.gov URLs
-  # Example: https://www.recreation.gov/camping/campgrounds/232447 -> campground_id = 232447
-  campground_id: "232447"  # Upper Pines, Yosemite Valley
+  # Example: https://www.recreation.gov/camping/campgrounds/232510 -> campground_id = 232510
+  campground_id: "232510"
   
   # Specific campsites in priority order (optional)
+  # Numeric campsite IDs only
   # Leave empty to try any available site
   campsite_ids: 
-    - "42"
-    - "38"
-    - "15"
-    - "22"
+    - "12345"
   
   # Trip dates
   arrival_date: "2025-08-15"

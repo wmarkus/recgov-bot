@@ -8,7 +8,7 @@ from pathlib import Path
 import httpx
 
 from .endpoints import Endpoints, DEFAULT_HEADERS
-from ..common.models import SessionState
+from ...common.models import SessionState
 
 logger = logging.getLogger(__name__)
 

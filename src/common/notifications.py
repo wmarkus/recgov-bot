@@ -187,14 +187,22 @@ class NotificationManager:
         self.providers.append(ConsoleNotifier())
         
         # Add configured providers
-        if config.email.enabled and config.email.sendgrid_api_key:
+        if config.email.enabled and config.email.sendgrid_api_key and config.email.address:
             self.providers.append(EmailNotifier(
                 api_key=config.email.sendgrid_api_key,
                 to_address=config.email.address
             ))
             logger.info("Email notifications enabled")
+        elif config.email.enabled:
+            logger.warning("Email notifications enabled but missing address or API key")
         
-        if config.sms.enabled and config.sms.twilio_account_sid:
+        if (
+            config.sms.enabled
+            and config.sms.twilio_account_sid
+            and config.sms.twilio_auth_token
+            and config.sms.twilio_from_number
+            and config.sms.phone
+        ):
             self.providers.append(SMSNotifier(
                 account_sid=config.sms.twilio_account_sid,
                 auth_token=config.sms.twilio_auth_token,
@@ -202,10 +210,14 @@ class NotificationManager:
                 to_number=config.sms.phone
             ))
             logger.info("SMS notifications enabled")
+        elif config.sms.enabled:
+            logger.warning("SMS notifications enabled but missing Twilio config")
         
         if config.webhook.enabled and config.webhook.url:
             self.providers.append(WebhookNotifier(config.webhook.url))
             logger.info("Webhook notifications enabled")
+        elif config.webhook.enabled:
+            logger.warning("Webhook notifications enabled but missing URL")
     
     async def notify_success(self, attempt: ReservationAttempt):
         """Send success notification"""
