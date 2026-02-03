@@ -7,6 +7,7 @@ python-dateutil>=2.8.0
 
 # Scheduling and timing
 apscheduler>=3.10.0
+pytz>=2023.3
 
 # Notifications
 sendgrid>=6.10.0  # Email
