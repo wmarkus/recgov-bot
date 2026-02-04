@@ -161,6 +161,116 @@ def browser_now(ctx):
     asyncio.run(run())
 
 
+@browser.command("quick")
+@click.pass_context
+def browser_quick(ctx):
+    """Interactive reservation - prompts for campground, site, and dates"""
+    from src.browser import RecGovBrowserBot
+    from datetime import date
+    
+    cfg = ctx.obj["config"]
+    
+    console.print(Panel(
+        "🏕️  Quick Reservation Setup\n\n"
+        "Enter your reservation details below.\n"
+        "Tip: Find campground IDs from recreation.gov URLs\n"
+        "Example: recreation.gov/camping/campgrounds/[bold]234501[/bold]",
+        style="blue"
+    ))
+    
+    # Prompt for campground ID
+    campground_id = click.prompt(
+        "\n📍 Campground ID",
+        default=cfg.target.campground_id if cfg.target.campground_id else None,
+        type=str
+    )
+    
+    # Prompt for site number
+    default_site = cfg.target.campsite_ids[0] if cfg.target.campsite_ids else None
+    site_number = click.prompt(
+        "🏕️  Site number (e.g., 06, A001)",
+        default=default_site,
+        type=str
+    )
+    
+    # Prompt for arrival date
+    console.print("\n[dim]Date format: YYYY-MM-DD (e.g., 2026-05-26)[/dim]")
+    
+    def parse_date(value):
+        try:
+            return datetime.strptime(value, "%Y-%m-%d").date()
+        except ValueError:
+            raise click.BadParameter(f"Invalid date format: {value}. Use YYYY-MM-DD")
+    
+    arrival_str = click.prompt(
+        "📅 Arrival date",
+        default=cfg.target.arrival.strftime("%Y-%m-%d") if cfg.target.arrival else None,
+        type=str
+    )
+    arrival_date = parse_date(arrival_str)
+    
+    departure_str = click.prompt(
+        "📅 Departure date",
+        default=cfg.target.departure.strftime("%Y-%m-%d") if cfg.target.departure else None,
+        type=str
+    )
+    departure_date = parse_date(departure_str)
+    
+    # Validate dates
+    if departure_date <= arrival_date:
+        console.print("[red]Error: Departure date must be after arrival date[/red]")
+        return
+    
+    nights = (departure_date - arrival_date).days
+    
+    # Confirm
+    console.print()
+    table = Table(title="Reservation Details", show_header=False)
+    table.add_column("Field", style="cyan")
+    table.add_column("Value", style="green")
+    table.add_row("Campground ID", campground_id)
+    table.add_row("Site", site_number)
+    table.add_row("Arrival", arrival_str)
+    table.add_row("Departure", departure_str)
+    table.add_row("Nights", str(nights))
+    console.print(table)
+    
+    if not click.confirm("\n🚀 Start reservation attempt?", default=True):
+        console.print("[yellow]Cancelled[/yellow]")
+        return
+    
+    # Run the reservation
+    async def run():
+        console.print(Panel("🚀 Attempting Reservation", style="green"))
+        
+        target = ReservationTarget(
+            campground_id=campground_id,
+            campsite_ids=[site_number],
+            arrival_date=arrival_date,
+            departure_date=departure_date
+        )
+        
+        async with RecGovBrowserBot(cfg) as bot:
+            result = await bot.attempt_reservation(target)
+            
+            if result.status == ReservationStatus.IN_CART:
+                console.print(Panel(
+                    f"[bold green]🎉 SUCCESS![/bold green]\n\n"
+                    f"Site: {result.campsite_secured.name if result.campsite_secured else site_number}\n"
+                    f"Dates: {arrival_str} to {departure_str} ({nights} nights)\n"
+                    f"Complete checkout within 15 minutes!",
+                    style="green"
+                ))
+                await bot.handoff_to_user()
+            else:
+                console.print(Panel(
+                    f"[bold red]❌ Failed[/bold red]\n\n{result.error_message}",
+                    style="red"
+                ))
+    
+    asyncio.run(run())
+
+
 @browser.command("schedule")
 @click.pass_context
 def browser_schedule(ctx):
