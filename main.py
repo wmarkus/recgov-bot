@@ -271,6 +271,177 @@ def browser_quick(ctx):
     asyncio.run(run())
 
 
+@browser.command("snipe")
+@click.pass_context
+def browser_snipe(ctx):
+    """Pre-stage everything, then strike at window open time"""
+    from src.browser import RecGovBrowserBot
+    import time
+    
+    cfg = ctx.obj["config"]
+    scheduler = PrecisionScheduler(cfg.schedule.timezone)
+    
+    async def run():
+        window_time = cfg.schedule.window_datetime
+        target = ReservationTarget(
+            campground_id=cfg.target.campground_id,
+            campsite_ids=cfg.target.campsite_ids,
+            arrival_date=cfg.target.arrival.date(),
+            departure_date=cfg.target.departure.date()
+        )
+        
+        console.print(Panel(
+            f"🎯 SNIPE MODE\n\n"
+            f"Campground: {target.campground_id}\n"
+            f"Site: {target.campsite_ids[0] if target.campsite_ids else 'Any'}\n"
+            f"Dates: {target.arrival_date} to {target.departure_date}\n"
+            f"Window: {window_time.strftime('%Y-%m-%d %H:%M:%S %Z')}\n\n"
+            f"Strategy:\n"
+            f"1. Login & navigate now\n"
+            f"2. Pre-select dates\n"
+            f"3. Wait for window\n"
+            f"4. STRIKE at {window_time.strftime('%H:%M:%S')}",
+            style="red"
+        ))
+        
+        async with RecGovBrowserBot(cfg) as bot:
+            # Phase 1: Login
+            console.print("\n[bold cyan]Phase 1: Login[/bold cyan]")
+            if not await bot._is_logged_in():
+                if not await bot.login():
+                    console.print("[red]Login failed![/red]")
+                    return
+            console.print("[green]✓ Logged in[/green]")
+            
+            # Phase 2: Navigate to availability page
+            console.print("\n[bold cyan]Phase 2: Navigate to campground[/bold cyan]")
+            await bot.navigate_to_availability(
+                target.campground_id,
+                target.arrival_date,
+                target.departure_date
+            )
+            console.print(f"[green]✓ On availability page[/green]")
+            
+            # Phase 3: Set dates in the date picker
+            console.print("\n[bold cyan]Phase 3: Pre-set dates[/bold cyan]")
+            arrival_str = target.arrival_date.strftime("%m/%d/%Y")
+            departure_str = target.departure_date.strftime("%m/%d/%Y")
+            
+            date_inputs = await bot.page.query_selector_all('input[placeholder*="mm/dd/yyyy"]')
+            if len(date_inputs) >= 2:
+                await date_inputs[0].click(click_count=3)
+                await bot.page.keyboard.type(arrival_str, delay=30)
+                await date_inputs[1].click(click_count=3)
+                await bot.page.keyboard.type(departure_str, delay=30)
+                await bot.page.keyboard.press("Enter")
+                await asyncio.sleep(2)
+                console.print(f"[green]✓ Dates set: {arrival_str} - {departure_str}[/green]")
+            else:
+                console.print("[yellow]⚠ Could not pre-set dates[/yellow]")
+            
+            # Phase 4: Find the site row
+            console.print("\n[bold cyan]Phase 4: Locate site row[/bold cyan]")
+            site_id = target.campsite_ids[0] if target.campsite_ids else None
+            site_row = None
+            if site_id:
+                site_row = await bot.page.query_selector(f'tr:has(a:has-text("{site_id}"))')
+                if site_row:
+                    console.print(f"[green]✓ Found site {site_id}[/green]")
+                else:
+                    console.print(f"[yellow]⚠ Site {site_id} row not found yet[/yellow]")
+            
+            # Phase 5: Wait for window with countdown
+            console.print("\n[bold cyan]Phase 5: Waiting for window...[/bold cyan]")
+            console.print("[dim]Press Ctrl+C to abort[/dim]\n")
+            
+            while True:
+                now = datetime.now(window_time.tzinfo)
+                remaining = (window_time - now).total_seconds()
+                
+                if remaining <= 0:
+                    break
+                
+                if remaining > 60:
+                    console.print(f"\r⏳ T-{int(remaining)}s    ", end="")
+                    await asyncio.sleep(1)
+                elif remaining > 10:
+                    console.print(f"\r⏳ T-{remaining:.1f}s   ", end="")
+                    await asyncio.sleep(0.1)
+                else:
+                    # Final countdown - poll rapidly
+                    console.print(f"\r🔥 T-{remaining:.3f}s ", end="")
+                    await asyncio.sleep(0.01)
+            
+            # Phase 6: STRIKE!
+            console.print("\n\n[bold red]🚀 GO GO GO![/bold red]")
+            
+            # Re-find site row (page may have updated)
+            if site_id:
+                site_row = await bot.page.query_selector(f'tr:has(a:has-text("{site_id}"))')
+            
+            if site_row:
+                # Click all available "A" cells rapidly
+                available_cells = await site_row.query_selector_all('button:has-text("A"), a:has-text("A")')
+                num_nights = (target.departure_date - target.arrival_date).days
+                
+                console.print(f"[yellow]Clicking {min(len(available_cells), num_nights)} date cells...[/yellow]")
+                
+                clicked = 0
+                for cell in available_cells:
+                    if clicked >= num_nights:
+                        break
+                    try:
+                        await cell.click()
+                        clicked += 1
+                    except:
+                        pass
+                
+                await asyncio.sleep(0.5)
+            
+            # Click Add to Cart
+            console.print("[yellow]Clicking Add to Cart...[/yellow]")
+            add_btn = await bot.page.query_selector('button:has-text("Add to Cart")')
+            if add_btn:
+                await add_btn.click()
+                console.print("[green]✓ Clicked Add to Cart![/green]")
+            
+            # Phase 7: CAPTCHA handling
+            console.print("\n[bold magenta]⚠️  SOLVE CAPTCHA NOW IF IT APPEARS![/bold magenta]")
+            console.print("[dim]Bot will wait for you...[/dim]\n")
+            
+            # Wait for CAPTCHA to be solved (check for cart success)
+            for i in range(120):  # Wait up to 2 minutes
+                # Check if we made it to cart
+                cart_success = await bot.page.query_selector('text="Added to Cart", text="View Cart", text="Checkout"')
+                if cart_success:
+                    console.print(Panel(
+                        "[bold green]🎉 SUCCESS! Item in cart![/bold green]\n\n"
+                        "Complete checkout NOW - you have 15 minutes!",
+                        style="green"
+                    ))
+                    break
+                
+                # Check if still on CAPTCHA
+                captcha = await bot.page.query_selector('iframe[src*="recaptcha"]')
+                if captcha and i % 10 == 0:
+                    console.print("[yellow]Waiting for CAPTCHA solve...[/yellow]")
+                
+                await asyncio.sleep(1)
+            
+            # Keep browser open
+            console.print("\n[cyan]Browser staying open for checkout. Press Ctrl+C when done.[/cyan]")
+            try:
+                while True:
+                    await asyncio.sleep(1)
+            except KeyboardInterrupt:
+                pass
+    
+    try:
+        asyncio.run(run())
+    except KeyboardInterrupt:
+        console.print("\n[yellow]Aborted[/yellow]")
+
+
 @browser.command("schedule")
 @click.pass_context
 def browser_schedule(ctx):
