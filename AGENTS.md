@@ -1,28 +1,29 @@
 # AGENTS.md
 
-This file provides guidance to WARP (warp.dev) when working with code in this repository.
+This file provides guidance to AI coding assistants when working with code in this repository.
 
 ## Project Overview
 
 A Recreation.gov campsite reservation bot with two approaches:
 - **Browser automation** (`src/browser/`): Playwright-based, slower but more reliable, handles CAPTCHAs
-- **Direct API** (`src/api/`): Fast (<1s attempts) but fragile, reverse-engineered endpoints
+- **Direct API** (`src/legacy/api/`): Fast (<1s attempts) but fragile, reverse-engineered endpoints (deprecated)
 
 The bot pre-authenticates, waits for reservation windows to open (typically 7:00 AM PT), and attempts to secure campsites with millisecond precision timing.
 
 ## Architecture
 
 ### Dual Strategy Pattern
-- Both browser and API modes share common configuration, models, scheduling, and notification infrastructure
+- Both browser and legacy API modes share common configuration, models, scheduling, and notification infrastructure
 - Browser mode uses Playwright for full browser automation with session handoff
-- API mode uses httpx for direct HTTP requests to reverse-engineered endpoints
-- Common layer (`src/common/`) provides configuration management (Pydantic models), Pydantic data models, precision timing, rate limiting, and notifications
+- Legacy API mode uses httpx for direct HTTP requests to reverse-engineered endpoints
+- Common layer (`src/common/`) provides configuration management (Pydantic models), data models, precision timing, rate limiting, and notifications
 
 ### Key Abstractions
 - `ReservationTarget`: Encapsulates what to reserve (campground, sites, dates)
 - `ReservationAttempt`: Tracks attempt lifecycle and status
-- `PrecisionScheduler`: High-precision timing using progressive sleep strategies (30s → 1s → 100ms → 1ms → busy-wait)
+- `PrecisionScheduler`: High-precision timing using progressive sleep strategies (30s -> 1s -> 100ms -> 1ms -> busy-wait)
 - `RateLimiter`: Token bucket algorithm for API requests
+- `RetryStrategy`: Configurable retry logic with optional exponential backoff
 - `BrowserSession`: Manages session persistence and handoff between bot and user
 
 ### Critical Flow
@@ -49,19 +50,37 @@ python main.py browser test                              # Test login and availa
 python main.py browser now                               # Immediate attempt
 python main.py browser schedule                          # Wait for window time
 
-# API mode (faster)
-python main.py api check                                 # Check availability
-python main.py api reserve                               # Attempt reservation
+# Legacy API mode (deprecated)
+python main.py legacy-api check                          # Check availability
+python main.py legacy-api reserve                        # Attempt reservation
 
 # View config
-python main.py info --config config/config.yaml
+python main.py info
 ```
 
 ### Testing
-The `tests/` directory is currently empty. When adding tests:
-- Use pytest with async support (`pytest-asyncio`)
-- Mock external Recreation.gov calls to avoid rate limits
-- Test precision timing with accelerated time mocks
+```bash
+# Run all tests (237 tests)
+pytest tests/ -v
+
+# Run specific test file
+pytest tests/test_models.py -v
+
+# Run with coverage
+pytest tests/ --cov=src --cov-report=html
+```
+
+Test organization:
+- `tests/conftest.py`: Shared fixtures (config, target)
+- `tests/test_config.py`: Configuration loading and validation
+- `tests/test_models.py`: Data models and their methods
+- `tests/test_scheduler.py`: PrecisionScheduler, RateLimiter, RetryStrategy
+- `tests/test_notifications.py`: Notification providers
+- `tests/test_session.py`: Browser session management
+- `tests/test_auth.py`: API authentication
+- `tests/test_endpoints.py`: URL building and endpoints
+- `tests/test_api_reservation_flow.py`: API client integration tests
+- `tests/test_browser_scheduled_flow.py`: Browser bot integration tests
 
 ### Configuration
 - Main config: `config/config.yaml` (copy from `config/config.example.yaml`)
@@ -71,7 +90,7 @@ The `tests/` directory is currently empty. When adding tests:
 ## Important Constraints
 
 ### Recreation.gov API Behavior
-- API endpoints in `src/api/endpoints.py` are reverse-engineered and undocumented
+- API endpoints in `src/legacy/api/endpoints.py` are reverse-engineered and undocumented
 - Endpoints can change without notice; verify by inspecting network traffic in browser DevTools
 - Rate limiting is enforced; default 2 req/s is safe
 - CAPTCHA can trigger on suspicious activity; browser mode handles with pause for human intervention
@@ -131,6 +150,7 @@ Main CLI configures Rich logging with tracebacks.
 ### `src/browser/`
 - `bot.py`: Main `RecGovBrowserBot` class, implements full reservation flow
 - `session.py`: Session persistence, cookie/storage management, handoff methods
+- `urls.py`: URL builders for Recreation.gov pages
 
 ### `src/legacy/api/`
 - `client.py`: `RecGovAPIClient` for direct HTTP requests (deprecated)
