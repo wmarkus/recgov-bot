@@ -79,27 +79,36 @@ class BrowserSession:
             logger.warning("No session to restore")
             return False
         
-        # Restore cookies
+        # Restore cookies (can be done before navigation)
         await context.add_cookies(self.cookies)
         
-        # Restore storage if page is available
-        if page and self.local_storage:
-            await page.evaluate("""
-                (items) => {
-                    for (const [key, value] of Object.entries(items)) {
-                        localStorage.setItem(key, value);
-                    }
-                }
-            """, self.local_storage)
-        
-        if page and self.session_storage:
-            await page.evaluate("""
-                (items) => {
-                    for (const [key, value] of Object.entries(items)) {
-                        sessionStorage.setItem(key, value);
-                    }
-                }
-            """, self.session_storage)
+        # Restore storage - need to be on the actual domain first
+        if page and (self.local_storage or self.session_storage):
+            try:
+                # Navigate to the site first to enable localStorage access
+                current_url = page.url
+                if not current_url or 'recreation.gov' not in current_url:
+                    await page.goto("https://www.recreation.gov", wait_until="domcontentloaded")
+                
+                if self.local_storage:
+                    await page.evaluate("""
+                        (items) => {
+                            for (const [key, value] of Object.entries(items)) {
+                                localStorage.setItem(key, value);
+                            }
+                        }
+                    """, self.local_storage)
+                
+                if self.session_storage:
+                    await page.evaluate("""
+                        (items) => {
+                            for (const [key, value] of Object.entries(items)) {
+                                sessionStorage.setItem(key, value);
+                            }
+                        }
+                    """, self.session_storage)
+            except Exception as e:
+                logger.warning(f"Could not restore storage: {e}")
         
         logger.info("Session restored to browser")
         return True

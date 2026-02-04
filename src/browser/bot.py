@@ -115,7 +115,7 @@ class RecGovBrowserBot:
     async def navigate_to_home(self):
         """Navigate to Recreation.gov homepage"""
         await self.page.goto(WebPages.home())
-        await self.page.wait_for_load_state("networkidle")
+        await self.page.wait_for_load_state("domcontentloaded")
     
     async def login(self, email: Optional[str] = None, password: Optional[str] = None) -> bool:
         """
@@ -131,7 +131,13 @@ class RecGovBrowserBot:
         try:
             # Go to login page
             await self.page.goto(WebPages.login())
-            await self.page.wait_for_load_state("networkidle")
+            await self.page.wait_for_load_state("domcontentloaded")
+            
+            # Wait for login form elements to be ready
+            await self.page.wait_for_selector(
+                'input[name="email"], input[type="email"], input[id="email"]',
+                timeout=15000
+            )
             
             # Check if already logged in
             if await self._is_logged_in():
@@ -145,19 +151,30 @@ class RecGovBrowserBot:
             # Click login button
             await self.page.click('button[type="submit"]')
             
-            # Wait for navigation
-            await self.page.wait_for_load_state("networkidle")
+            # Wait for navigation after login
+            await self.page.wait_for_load_state("domcontentloaded")
+            # Give time for redirect and session establishment
+            await asyncio.sleep(3)
             
-            # Check for CAPTCHA
-            if await self._check_captcha():
-                logger.warning("CAPTCHA detected during login")
-                await self._handle_captcha()
+            # Debug: log current URL after login attempt
+            logger.info(f"Post-login URL: {self.page.url}")
             
-            # Verify login
+            # First check if login already succeeded (invisible reCAPTCHA passed automatically)
             if await self._is_logged_in():
                 logger.info("Login successful")
                 await self.session.capture_from_page(self.page, self.context)
                 return True
+            
+            # Only check for blocking CAPTCHA if not logged in
+            if await self._check_captcha():
+                logger.warning("CAPTCHA detected during login")
+                await self._handle_captcha()
+                
+                # Check login again after CAPTCHA
+                if await self._is_logged_in():
+                    logger.info("Login successful after CAPTCHA")
+                    await self.session.capture_from_page(self.page, self.context)
+                    return True
             
             # Check for error message
             error = await self.page.query_selector('.error-message, .alert-danger')
@@ -178,40 +195,98 @@ class RecGovBrowserBot:
     
     async def _is_logged_in(self) -> bool:
         """Check if currently logged in"""
-        # Look for user menu or account indicator
+        # Primary check: Look for user menu or account indicators
         indicators = [
             '[data-component="UserMenu"]',
             '.user-menu',
             'a[href*="/account"]',
             'button:has-text("Sign Out")',
+            'a:has-text("Sign Out")',
+            'button:has-text("Log Out")',
+            'a:has-text("Log Out")',
+            '[data-testid="user-menu"]',
+            '[aria-label*="account"]',
+            '[aria-label*="Account"]',
+            '.nav-account',
+            '#account-menu',
+            # Common avatar/profile indicators
+            '.user-avatar',
+            '.profile-icon',
+            '[data-testid="avatar"]',
+            'img[alt*="profile"]',
+            'img[alt*="avatar"]',
         ]
         
         for selector in indicators:
             try:
                 element = await self.page.query_selector(selector)
                 if element:
+                    logger.debug(f"Logged in indicator found: {selector}")
                     return True
             except:
                 continue
+        
+        # Secondary check: Login form/button is NOT present
+        # If we're on homepage and login elements are gone, we're logged in
+        login_indicators = [
+            'input[name="email"]',
+            'input[type="password"]',
+            'a:has-text("Sign In")',
+            'a:has-text("Log In")',
+            'button:has-text("Sign In")',
+        ]
+        
+        login_elements_found = 0
+        for selector in login_indicators:
+            try:
+                element = await self.page.query_selector(selector)
+                if element and await element.is_visible():
+                    login_elements_found += 1
+            except:
+                continue
+        
+        # If no login elements visible and we're on homepage, assume logged in
+        if login_elements_found == 0:
+            url = self.page.url.lower()
+            if 'recreation.gov' in url and '/log-in' not in url:
+                logger.info("No login elements visible - assuming logged in")
+                return True
         
         return False
     
     async def _check_captcha(self) -> bool:
-        """Check if CAPTCHA is present"""
-        captcha_indicators = [
-            'iframe[src*="recaptcha"]',
-            '.g-recaptcha',
-            '#captcha',
-            '[data-callback="onCaptchaSuccess"]',
+        """Check if a blocking CAPTCHA challenge is present (not invisible reCAPTCHA)"""
+        # Check for visible reCAPTCHA challenge iframe (the actual challenge, not the badge)
+        captcha_challenges = [
+            # reCAPTCHA challenge iframe (visible challenge popup)
+            'iframe[src*="recaptcha"][src*="bframe"]',
+            'iframe[title*="recaptcha challenge"]',
+            # Visible CAPTCHA container that's blocking
+            '.rc-imageselect',  # Image selection challenge
+            '.rc-doscaptcha',   # "Try again" challenge
+            '#captcha-box:visible',
+            # hCaptcha
+            'iframe[src*="hcaptcha"]',
         ]
         
-        for selector in captcha_indicators:
+        for selector in captcha_challenges:
             try:
                 element = await self.page.query_selector(selector)
                 if element:
-                    return True
+                    # Verify it's actually visible
+                    is_visible = await element.is_visible()
+                    if is_visible:
+                        return True
             except:
                 continue
+        
+        # Also check if we're on an explicit CAPTCHA/challenge page
+        try:
+            url = self.page.url.lower()
+            if 'captcha' in url or 'challenge' in url:
+                return True
+        except:
+            pass
         
         return False
     
@@ -263,20 +338,42 @@ class RecGovBrowserBot:
         url = WebPages.campground(campground_id)
         logger.info(f"Navigating to campground {campground_id}")
         await self.page.goto(url)
-        await self.page.wait_for_load_state("networkidle")
+        await self.page.wait_for_load_state("domcontentloaded")
+        # Wait for campground content to load
+        await self.page.wait_for_selector('h1, [data-component="FacilityHeader"]', timeout=15000)
     
     async def navigate_to_availability(self, campground_id: str, arrival: date, departure: date):
         """Navigate to campground availability with dates set"""
         # Go to availability page
         url = WebPages.availability(campground_id)
+        logger.info(f"Navigating to availability: {url}")
         await self.page.goto(url)
-        await self.page.wait_for_load_state("networkidle")
+        await self.page.wait_for_load_state("domcontentloaded")
         
-        # Set dates
+        # Wait for page content to load - use flexible selectors
+        availability_indicators = [
+            '[data-component="AvailabilityGrid"]',
+            '.availability-grid',
+            '.rec-availability-grid',
+            'table[class*="availability"]',
+            '[class*="availability"]',
+            '.campsite-row',
+            '[data-testid="availability"]',
+        ]
+        
+        for selector in availability_indicators:
+            try:
+                await self.page.wait_for_selector(selector, timeout=5000)
+                logger.info(f"Found availability grid with selector: {selector}")
+                break
+            except:
+                continue
+        
+        # Give extra time for dynamic content
+        await asyncio.sleep(2)
+        
+        # Set dates if date inputs are available
         await self._set_dates(arrival, departure)
-        
-        # Wait for availability to load
-        await self.page.wait_for_selector('[data-component="AvailabilityGrid"]', timeout=10000)
     
     async def _set_dates(self, arrival: date, departure: date):
         """Set arrival and departure dates in the date picker"""
@@ -357,31 +454,174 @@ class RecGovBrowserBot:
         """
         Add a campsite to cart.
         
+        campsite_id can be either:
+        - A site name like "06", "A001", etc.
+        - An internal Recreation.gov campsite ID
+        
         Returns True if successful.
         """
-        logger.info(f"Adding campsite {campsite_id} to cart...")
+        logger.info(f"Adding campsite {campsite_id} to cart for {arrival} to {departure}...")
         
         try:
-            # Navigate to campsite page
-            await self.page.goto(WebPages.campsite(campsite_id))
-            await self.page.wait_for_load_state("networkidle")
+            # Strategy 1: Find and click on a link to the site detail page
+            # On availability pages, site names are often links
+            site_link_selectors = [
+                f'a:has-text("Site {campsite_id}")',
+                f'a:has-text("{campsite_id}")',
+                f'a[href*="campsites"]:has-text("{campsite_id}")',
+            ]
             
-            # Set dates if needed
-            await self._set_dates(arrival, departure)
+            site_link = None
+            for selector in site_link_selectors:
+                try:
+                    site_link = await self.page.query_selector(selector)
+                    if site_link:
+                        href = await site_link.get_attribute("href")
+                        if href and "campsites" in href:
+                            logger.info(f"Found site link: {href}")
+                            # Navigate to the campsite detail page
+                            await site_link.click()
+                            await self.page.wait_for_load_state("domcontentloaded")
+                            await asyncio.sleep(2)
+                            break
+                except:
+                    continue
             
-            # Look for "Add to Cart" button
-            add_button = await self.page.query_selector(
-                'button:has-text("Add to Cart"), button:has-text("Book Now")'
-            )
+            # Now we should be on the campsite detail page
+            # Set the dates using the date picker
+            arrival_str = arrival.strftime("%m/%d/%Y")
+            departure_str = departure.strftime("%m/%d/%Y")
+            logger.info(f"Setting dates: {arrival_str} to {departure_str}")
+            
+            # First, try to click on the date picker to open it
+            date_picker_triggers = [
+                'button[aria-label*="date"]',
+                'button[class*="date"]',
+                '[data-component="DateRange"]',
+                '.sarsa-date-picker-trigger',
+                'input[placeholder*="Date"]',
+                '.date-picker-trigger',
+            ]
+            
+            for trigger in date_picker_triggers:
+                try:
+                    picker = await self.page.query_selector(trigger)
+                    if picker and await picker.is_visible():
+                        logger.info(f"Clicking date picker trigger: {trigger}")
+                        await picker.click()
+                        await asyncio.sleep(1)
+                        break
+                except:
+                    continue
+            
+            # Try to find and fill date inputs
+            date_input_selectors = [
+                ('input[id*="start-date"]', 'input[id*="end-date"]'),
+                ('input[id*="arrival"]', 'input[id*="departure"]'),
+                ('input[name*="start"]', 'input[name*="end"]'),
+                ('input[placeholder*="Start"]', 'input[placeholder*="End"]'),
+                ('input[aria-label*="arrival"]', 'input[aria-label*="departure"]'),
+                ('input[aria-label*="Start"]', 'input[aria-label*="End"]'),
+            ]
+            
+            dates_set = False
+            for start_sel, end_sel in date_input_selectors:
+                try:
+                    start_input = await self.page.query_selector(start_sel)
+                    end_input = await self.page.query_selector(end_sel)
+                    if start_input and end_input:
+                        logger.info(f"Found date inputs: {start_sel}, {end_sel}")
+                        # Clear and fill start date
+                        await start_input.click()
+                        await asyncio.sleep(0.3)
+                        await start_input.fill("")
+                        await start_input.type(arrival_str, delay=50)
+                        await asyncio.sleep(0.5)
+                        
+                        # Clear and fill end date
+                        await end_input.click()
+                        await asyncio.sleep(0.3)
+                        await end_input.fill("")
+                        await end_input.type(departure_str, delay=50)
+                        await asyncio.sleep(0.5)
+                        
+                        # Press Enter or Tab to confirm
+                        await self.page.keyboard.press("Tab")
+                        await asyncio.sleep(1)
+                        dates_set = True
+                        break
+                except Exception as e:
+                    logger.debug(f"Date input error with {start_sel}: {e}")
+                    continue
+            
+            # If we couldn't fill inputs, try clicking on calendar dates directly
+            if not dates_set:
+                logger.info("Trying to click calendar dates directly")
+                # Look for the arrival date in the calendar
+                arrival_day = arrival.day
+                arrival_month = arrival.strftime("%B")
+                
+                # Try to find the date in a calendar view
+                date_cell_selectors = [
+                    f'button[aria-label*="{arrival_month}"][aria-label*="{arrival_day}"]',
+                    f'td[aria-label*="{arrival_day}"]',
+                    f'button:has-text("{arrival_day}")',
+                ]
+                
+                for selector in date_cell_selectors:
+                    try:
+                        cells = await self.page.query_selector_all(selector)
+                        if cells:
+                            await cells[0].click()
+                            await asyncio.sleep(0.5)
+                            dates_set = True
+                            break
+                    except:
+                        continue
+            
+            # Wait for availability to update after date selection
+            await asyncio.sleep(2)
+            
+            # Look for "Add to Cart" or "Book" button
+            add_button_selectors = [
+                'button:has-text("Add to Cart")',
+                'button:has-text("Book Now")',
+                'button:has-text("Book")',
+                'button:has-text("Reserve")',
+                'a:has-text("Add to Cart")',
+                'a:has-text("Book")',
+            ]
+            
+            add_button = None
+            for selector in add_button_selectors:
+                try:
+                    add_button = await self.page.query_selector(selector)
+                    if add_button and await add_button.is_visible():
+                        logger.info(f"Found add button with selector: {selector}")
+                        break
+                    add_button = None
+                except:
+                    continue
             
             if not add_button:
                 logger.warning("Add to Cart button not found")
+                # Take a screenshot for debugging
+                try:
+                    await self.page.screenshot(path="debug_screenshot.png")
+                    logger.info("Saved debug screenshot to debug_screenshot.png")
+                except:
+                    pass
                 return False
             
-            # Check if button is enabled
-            is_disabled = await add_button.get_attribute("disabled")
+            # Check if button is enabled - wait a bit for it to become enabled
+            for _ in range(10):
+                is_disabled = await add_button.get_attribute("disabled")
+                if not is_disabled:
+                    break
+                await asyncio.sleep(0.5)
+            
             if is_disabled:
-                logger.warning("Add to Cart button is disabled")
+                logger.warning("Add to Cart button is disabled - dates may not be available")
                 return False
             
             # Click the button
@@ -430,7 +670,9 @@ class RecGovBrowserBot:
     async def navigate_to_cart(self):
         """Navigate to the shopping cart"""
         await self.page.goto(WebPages.cart())
-        await self.page.wait_for_load_state("networkidle")
+        await self.page.wait_for_load_state("domcontentloaded")
+        # Wait for cart content
+        await asyncio.sleep(1)
     
     async def get_cart_expiry(self) -> Optional[int]:
         """
@@ -673,14 +915,17 @@ class RecGovBrowserBot:
         instructions = SessionHandoff.generate_handoff_instructions(method, data)
         print(instructions)
         
-        # If not headless, wait for user to complete checkout
-        if not self.config.browser.headless and method == "remote":
-            print("\nPress Ctrl+C when checkout is complete...")
+        # If not headless, always wait for user to complete checkout
+        if not self.config.browser.headless:
+            print("\n" + "=" * 60)
+            print("🛒 Browser is open for you to complete checkout!")
+            print("Press Ctrl+C when done...")
+            print("=" * 60 + "\n")
             try:
                 while True:
                     await asyncio.sleep(1)
             except KeyboardInterrupt:
-                pass
+                print("\nCheckout session ended.")
         
         return instructions
 
