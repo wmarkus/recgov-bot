@@ -1,0 +1,149 @@
+{
+  "cookies": [
+    {
+      "name": "_GRECAPTCHA",
+      "value": "09AKhCRwgMWPhXn_oiU53Mxd22buNTdtkll_pMps7xiGA-KlTAjcuiqOS-KZ9XggMFXSXEfbOvr7cKmlyPHyvlrBs",
+      "domain": "www.google.com",
+      "path": "/recaptcha",
+      "expires": 1785799060.444646,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "_ga",
+      "value": "GA1.1.1549138614.1770245538",
+      "domain": ".recreation.gov",
+      "path": "/",
+      "expires": 1804807053.638023,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Strict"
+    },
+    {
+      "name": "IDE",
+      "value": "AHWqTUkN_lYPwu7jDJzZNdE3DnrsoxNOVPRHT1EamA9hEzhKQRzGiK2sEYDyfuNJ",
+      "domain": ".doubleclick.net",
+      "path": "/",
+      "expires": 1804805538.754174,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "BIGipServerpool_recreationonestopprod",
+      "value": "0204f03c29486d45ecfa44afa3ad56e2",
+      "domain": "help.recreation.gov",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "_gcl_au",
+      "value": "1.1.2119010114.1770245536.2013562690.1770245539.1770245541",
+      "domain": ".recreation.gov",
+      "path": "/",
+      "expires": 1778021536,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "r1s-fingerprint",
+      "value": "p1xtfD/SU8bJvCDE3PaX+QrGsQiuUcX5PFntYMmm8seezWhBO/rFVMEMM3opU4qWn0de6y7tGJed0rRa1BlfXA==",
+      "domain": ".recreation.gov",
+      "path": "/",
+      "expires": 1770331944.107256,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "cwr_u",
+      "value": "061df0f6-3a71-4302-87e6-a7ac4c77510e",
+      "domain": ".www.recreation.gov",
+      "path": "/",
+      "expires": 1772839053,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Strict"
+    },
+    {
+      "name": "_hjSession_2219619",
+      "value": "eyJpZCI6IjA3ZDlhNDE1LWQ3ZjgtNDgzNC04MjhlLTUyNTMzYzhmNmQzZSIsImMiOjE3NzAyNDY1NTA2MzAsInMiOjAsInIiOjAsInNiIjowLCJzciI6MCwic2UiOjAsImZzIjoxLCJzcCI6MX0=",
+      "domain": ".recreation.gov",
+      "path": "/",
+      "expires": 1770248869,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "_hjSessionUser_2219619",
+      "value": "eyJpZCI6IjY2NmZiZmVmLWUzMGYtNTYzMy1iNGJlLWM5ZDJhZDVkZWY2OCIsImNyZWF0ZWQiOjE3NzAyNDY1NTA2MjksImV4aXN0aW5nIjp0cnVlfQ==",
+      "domain": ".recreation.gov",
+      "path": "/",
+      "expires": 1801783003,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "cwr_s",
+      "value": "eyJzZXNzaW9uSWQiOiJlNDFkN2EzMi1mMDI4LTQ0NDctYTgwMC00YWZmODBmYTQ0MmEiLCJyZWNvcmQiOnRydWUsImV2ZW50Q291bnQiOjIwMCwicGFnZSI6eyJwYWdlSWQiOiIvY2FtcGluZy9jYW1wZ3JvdW5kcy8yMzI1MTAiLCJwYXJlbnRQYWdlSWQiOiIvY2FtcGluZy9jYW1wZ3JvdW5kcy8yMzQ1MDEiLCJpbnRlcmFjdGlvbiI6MSwicmVmZXJyZXIiOiIiLCJyZWZlcnJlckRvbWFpbiI6IiIsInN0YXJ0IjoxNzcwMjQ3MDAxNTQ2fX0=",
+      "domain": ".www.recreation.gov",
+      "path": "/",
+      "expires": 1770248808,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Strict"
+    },
+    {
+      "name": "_ga_9TNNMGP8WJ",
+      "value": "GS2.1.s1770245538$o1$g1$t1770247053$j6$l0$h0",
+      "domain": ".recreation.gov",
+      "path": "/",
+      "expires": 1804807053.637907,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Strict"
+    },
+    {
+      "name": "_ga_X10C0SX7L7",
+      "value": "GS2.1.s1770245538$o1$g1$t1770247059$j60$l1$h1715793808",
+      "domain": ".recreation.gov",
+      "path": "/",
+      "expires": 1804807059.198956,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Strict"
+    }
+  ],
+  "local_storage": {
+    "recommendation-refs": "{\"232510\":{\"entityId\":\"232510\",\"entityType\":\"Campground\",\"bookingVersion\":\"campground-vnull\",\"bookingSource\":\"campsitePage\",\"referrer\":\"campground-vnull:campsitePage\"},\"234501\":{\"entityId\":\"234501\",\"entityType\":\"Campground\",\"bookingVersion\":\"campground-vnull\",\"bookingSource\":\"campsitePage\",\"referrer\":\"campground-vnull:campsitePage\"}}",
+    "mapbox.eventData:cjFzLXRvb2xz": "{\"lastSuccess\":1770247003141,\"tokenU\":\"r1s-tools\"}",
+    "search_history": "[{\"city\":\"Ashford\",\"country_code\":\"United States\",\"entity_id\":\"232510\",\"entity_type\":\"campground\",\"is_active\":true,\"last_used\":\"2026-02-03T23:03:43.073Z\",\"name\":\"COUGAR ROCK GROUP CAMPGROUND\",\"org_id\":\"128\",\"org_name\":\"National Park Service\",\"parent_entity_id\":\"2835\",\"parent_entity_type\":\"recarea\",\"preview_image_url\":\"https://cdn.recreation.gov/public/2018/12/07/21/48/232510_3ae8bdb0-612f-4b4d-ae2b-30d402f485da_700.webp\",\"reservable\":true,\"state_code\":\"Washington\",\"text\":\"COUGAR ROCK GROUP CAMPGROUND\",\"synced\":true},{\"city\":\"Ashford\",\"country_code\":\"United States\",\"entity_id\":\"232466\",\"entity_type\":\"campground\",\"is_active\":true,\"last_used\":\"2026-01-27T10:23:49.164Z\",\"name\":\"COUGAR ROCK CAMPGROUND\",\"org_id\":\"128\",\"org_name\":\"National Park Service\",\"parent_entity_id\":\"2835\",\"parent_entity_type\":\"recarea\",\"preview_image_url\":\"https://cdn.recreation.gov/public/images/65825_700.webp\",\"reservable\":true,\"state_code\":\"Washington\",\"text\":\"COUGAR ROCK CAMPGROUND\",\"synced\":true},{\"city\":\"Port Angeles\",\"country_code\":\"United States\",\"entity_id\":\"4098362\",\"entity_type\":\"permit\",\"is_active\":true,\"last_used\":\"2025-08-11T16:14:50.36Z\",\"name\":\"Olympic National Park Wilderness Permit\",\"org_id\":\"128\",\"org_name\":\"National Park Service\",\"parent_entity_id\":\"2881\",\"parent_entity_type\":\"recarea\",\"preview_image_url\":\"https://cdn.recreation.gov/public/2019/03/12/19/01/4098362_0810c814-aa06-483b-84e7-ec295665ac19_700.jpg\",\"reservable\":true,\"state_code\":\"Washington\",\"text\":\"Olympic National Park Wilderness Permit\",\"synced\":true},{\"city\":\"Packwood\",\"country_code\":\"United States\",\"entity_id\":\"232465\",\"entity_type\":\"campground\",\"is_active\":true,\"last_used\":\"2025-06-19T14:39:53.406Z\",\"name\":\"OHANAPECOSH CAMPGROUND\",\"org_id\":\"128\",\"org_name\":\"National Park Service\",\"parent_entity_id\":\"2835\",\"parent_entity_type\":\"recarea\",\"preview_image_url\":\"https://cdn.recreation.gov/public/images/65770.jpg\",\"reservable\":true,\"state_code\":\"Washington\",\"text\":\"OHANAPECOSH CAMPGROUND\",\"synced\":true},{\"entity_id\":\"4675309\",\"entity_type\":\"permit\",\"is_active\":true,\"last_used\":\"2024-05-01T15:03:23.283Z\",\"name\":\"Mount St. Helens Climbing Permit\",\"org_id\":\"131\",\"org_name\":\"USDA Forest Service\",\"parent_entity_id\":\"1117\",\"parent_entity_type\":\"recarea\",\"preview_image_url\":\"https://cdn.recreation.gov/public/2019/02/26/22/16/4675309_3dd6e2d3-992c-4a6d-85dd-bbd0bb37ba7a_700.jpg\",\"reservable\":true,\"text\":\"Mount St. Helens Climbing Permit\",\"synced\":true}]",
+    "cwr_i": "{\"IdentityId\":\"us-east-1:c12af4ba-59e0-c40d-7bd8-80cf598f99a2\"}",
+    "ld:588a570044b03e0b32112cfc:$diagnostics": "{\"dataSinceDate\":1770246550783,\"droppedEvents\":0,\"eventsInLastBatch\":0,\"streamInits\":[]}",
+    "_gcl_ls": "{\"schema\":\"gcl\",\"version\":1,\"gcl_ctr\":{\"value\":{\"value\":0,\"timeouts\":0,\"errors\":0,\"creationTimeMs\":1770245536212},\"expires\":1778021536212}}",
+    "cwr_c": "{\"accessKeyId\":\"ASIA4CKXUXJM2F6ZBYB4\",\"secretAccessKey\":\"ZM92USZRxmhl57OtmeYU3ZmOwONTGMvj8NNRk/z6\",\"sessionToken\":\"IQoJb3JpZ2luX2VjEFgaCXVzLWVhc3QtMSJIMEYCIQDynvnKxe5V8n/c2nQoCDkG5ThCdQSd2NkKUSD0agQkIAIhALL5uNbQq1emjdm5PAyaCEkhQwlwjFzuSyCPZO+5Y9rIKq4FCCAQBBoMODI5NjQ5MzY5Njg5IgxeSTperiFmOdOpocsqiwXG0GnG4QRb3ClqpUqHqaqfiUlmIEmThsceTVK+7k+JHo1UU0vbG7w93U598tezuNOHjQhZYaPUd4Xg01tL8BNFkzUu97lizfyVCOBMzjXj7+529eUdCmxi1DT3ttfP105QXMtT+v/9ir/b/Q4kC//jVtDbfiqkDxoZYa0uuK1y15WyNrmsmkWizRFhHirj9Do3Rh/YAIm5yfT/eyNji8jhmkkAo/+aYNpZubCksrbp6O9EJ4jYajfMRA9u6QCwl2RNLQFHRsYWJqQG0NCVw42O6ivqSK2Wel+ySu4HGCKx87mn4TeYajGdRbofVph5Bev1x57HHFa4A6CRdvNDt0rkqN9q1nF6gp0UnQLvslGBoqNO2bkcB1K/VvvP6uIDA2Z2iT4SmaJem8xjmsSBSliprnXNiE6i4C1+RyAc6HM5FPrqUkJJJyiVcpg22RBwjN0hx4+/+DulcMZqhrVZbwo40hzobJ04bGHv+Pi0p3wG8BQ7YXa+EFdeMNispYxMCsq+4SS4LYJF60Bir0PaOWFVPHHHURWKvYlX1eauSMLZOpQ1a0i/8gnQ70b/Aw/54Qb7Kli2IJuDLopHJ5KvR/VXdPA8sTu5JBkJU3sUUzrAcxeNfn6sy2q7crU9eN59DnMECOcTUgk5fyaY7nxzfMqo9WY56aGlx8SSTSElkoWoQ/ZPjc9YX3heFl21amFEtVzviuT7krrMSpYHSqLcrhbLDoBcT17tyRmFyYhd85ZI/jZzA7uo44koVRqi6lus/HoyKtvKSQIZJU2YyaI4al/BLZgdB8a5NO5jdJYiA0zd6uU+DS81oweyK1TiH/tALnfTb9PHXt5yt4+8PllNY8ojeYMbtyOMugMvGV8wlaOPzAY63QI1O5IZNNSrCeOP/4VwDprgsc5TNT7bKM79Tm69FCi8t2Boxuwplhc1Q3IB2O2q/HuGyGqIiOxQCvZ1eRYhJXP4J4DM25NhQj0Da/P/F9D/w+xsDbc/QS6CRfVg2Rza+eFjLFGHWlDDCbulDFJIu0f8lo+I7yMxeWBQEZhzJezXGV+o+g/gChm76X58S+orpfiKdtvb4g5Nf7eZaz8ZMXGG+YOLb5aUtPuS2WuA2F+2h3hqitTY4I5AIv0X0Qqd+epFJgsg4S33keuoYTIWuScj29dkKYz7Bk4e0mRa0P2csoT7R58TDcVzH61LWuikW5vDUg54X2b4QvxZDmz8sEIS1dyvgNjxAqX+A7uF4sS8F/H5kcHNlWW54ar31/Fk59vTQkcAVe0bftfGiOcPnPQdbI6pfapoFuU4DUuW+Th+8YIOVQ9SSHTdNkbM9zeHjmqtLP4jTNxAAPgeAcgH\",\"expiration\":\"2026-02-05T00:09:09.000Z\"}",
+    "_grecaptcha": "09AKhCRwgcPdQYyf_hVvUePmHn0927WOy7kuVDOO9yej6Lxb_piu4DGvQfk-qzC8o652ROBxrbQEsiEw-sAfer2YqZQY8J8gGv4aEmdXEjzGoh2fibqZ22QTCcrrdEbns6",
+    "kampyleUserSession": "1770247053836",
+    "mapbox.eventData.uuid:cjFzLXRvb2xz": "null",
+    "kampyleUserPercentile": "28.886943982820725",
+    "gridSortObject": "{\"sortedColumnId\":\"06-15-2026\",\"isSortAsc\":true}",
+    "kampyleUserSessionsCount": "5",
+    "r1s_search_session": "{\"showSearchInput\":true,\"what\":\"\",\"headerTextQuery\":\"\",\"where\":\"\",\"lat\":null,\"lng\":null,\"map_center_lat\":null,\"map_center_lng\":null,\"radius\":null,\"placeid\":null,\"placename\":null,\"start\":null,\"sort\":null,\"size\":null,\"checkin_time\":null,\"checkout_time\":null,\"highlighted_item\":-1,\"uiFilters\":{\"hasFilters\":false,\"accommodations\":{},\"agencies\":{},\"campsiteUseTypes\":{},\"campsiteTypes\":{},\"campsiteAmenities\":{},\"campsiteElectricityHookup\":{},\"campsiteVehicleLength\":{},\"campsiteEquipment\":{},\"activities\":{},\"occupants\":{},\"inventoryTypes\":{},\"tourTypes\":{},\"tourAccessible\":{},\"tourDifficulty\":{},\"tourDuration\":{},\"tourPrice\":{},\"tourTime\":{},\"tourTimes\":{},\"permitTypes\":{},\"reservable\":{},\"lastAppliedFilter\":null,\"includeUnavailable\":true},\"inventoryTypeFiltersVisible\":false,\"filtersVisible\":false,\"filters\":[],\"aggregations\":[],\"type\":\"UPDATE_SEARCH_CRITERIAS\",\"last_updated_datetime\":1770246999259,\"selectedSuggestion\":null}",
+    "kampyleSessionPageCounter": "1",
+    "r1s-ld-user-bucket-ext-100": "26",
+    "df-session-id": "a713e582-6c11-4d67-a96f-e06d0a4d6d50",
+    "recaccount": "{\"access_token\":\"eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJleHRlcm5hbCIsImV4cCI6MTc3MDI0NzM0NCwianRpIjoiYmViMDZiYTItZDY0OS00NDQxLTk0YWQtMzc0NWIzMTFkNzk5IiwiaWF0IjoxNzcwMjQ1NTM0LCJpc3MiOiJyMXMiLCJuYmYiOjE3NzAyNDU1MzQsInN1YiI6IjQ5NTA2OTgzIiwiYWNjdCI6eyJhY2NvdW50X2lkIjoiNDk1MDY5ODMiLCJjZWxsX3Bob25lIjoiKDIwNikgNjczLTY2NjMiLCJjc3JfYWN0b3JfaWQiOiIiLCJlbWFpbCI6IndlaWNrZW5tZWllci5tYXJrdXNAZ21haWwuY29tIiwiZW1lcmdlbmN5X2NvbnRhY3QiOnsiZmlyc3RfbmFtZSI6IiIsImxhc3RfbmFtZSI6IiIsInBob25lIjoiIn0sImZhdm9yaXRlcyI6bnVsbCwiZmlyc3RfbmFtZSI6Ik1hcmt1cyIsImhvbWVfYWRkcmVzcyI6eyJhZGRyZXNzMSI6IjE5MjAgNHRoIEF2ZW51ZSBOb3J0aCIsImFkZHJlc3MyIjoiIiwiY2l0eSI6IlNFQVRUTEUiLCJjb3VudHJ5IjoiVVNBIiwic3RhdGUiOiJXQSIsInppcF9jb2RlIjoiOTgxMDkifSwiaG9tZV9waG9uZSI6IigyMDYpIDY3My02NjYzIiwiaXNfY29tbWVyY2lhbF9hY2NvdW50IjpmYWxzZSwibGFzdF9uYW1lIjoiV2VpY2tlbm1laWVyIiwibGVnYWN5X2FjY291bnQiOmZhbHNlLCJzdWJzY3JpYmVkX3RvX3Bvc3RfdmlzaXRfZW1haWxzIjp0cnVlLCJuZXdzbGV0dGVyX2FsZXJ0cyI6ZmFsc2UsIm5ld3NsZXR0ZXJfc3Vic2NyaWJlZCI6IjAwMDEtMDEtMDFUMDA6MDA6MDBaIiwibmV3c2xldHRlcl91bnN1YnNjcmliZWQiOiIwMDAxLTAxLTAxVDAwOjAwOjAwWiIsInBhc3NlcyI6W10sInBob25lX2FsZXJ0cyI6ZmFsc2UsInByb2ZpbGVfcGljdHVyZV9pZCI6IiIsInNtc19hbGVydHMiOmZhbHNlLCJ0cmlwX3ByZWZlcmVuY2VzIjpudWxsLCJsb2dpbl9zb3VyY2UiOiIiLCJyZWdpc3RyYXRpb25fc291cmNlIjoiIiwicmVkaXJlY3RfdXJsIjoiIiwidGVuYW50X2lkIjoiIiwibWFpbGluZ19hZGRyZXNzIjp7ImFkZHJlc3MxIjoiIiwiYWRkcmVzczIiOiIiLCJjaXR5IjoiIiwiY291bnRyeSI6IiIsInN0YXRlIjoiIiwiemlwX2NvZGUiOiIifSwidmVoaWNsZV9pbmZvIjp7Im1ha2UiOiIiLCJtb2RlbCI6IiIsImNvbG9yIjoiIiwibGljZW5zZV9zdGF0ZSI6IiIsImxpY2Vuc2VfbnVtYmVyIjoiIiwiaXNfaW50ZXJuYXRpb25hbCI6ZmFsc2UsImlzX2F3ZCI6ZmFsc2UsImlzX2hpZ2hfY2xlYXJhbmNlIjpmYWxzZX0sImlzX2Fub255bWl6ZWQiOmZhbHNlLCJhbm9ueW1pemF0aW9uX2RhdGUiOiIwMDAxLTAxLTAxVDAwOjAwOjAwWiJ9LCJmaW5nZXJwcmludCI6InAxeHRmRC9TVThiSnZDREUzUGFYK1FyR3NRaXVVY1g1UEZudFlNbW04c2VleldoQk8vckZWTUVNTTNvcFU0cVduMGRlNnk3dEdKZWQwclJhMUJsZlhBPT0ifQ.bBdtFEw4Nj5Fm8CDm4hLlyNz9uRiqJJG_cRecj1Lj2rZxB5ftyL2UqHXcn-k19wN0Fp1-q6_WS_XPYEPw7cgfiZneOBmhD5d2kZfqVFad8Wjt1_JkLVM2qLE7zFkWD46lVOaocE90V-Vcr1ndvj0y5umFKMx4u-0-li3abTmSufF9l7ZK4xV5nEfjJ7karFY22a6TKznqaAR-xRTegwEqKa8VT2Mp5YTHhVkvRZ_Yi2j0wcpN_DTx4cYpmHdfEq_2k0jU1_1Pu0Cc5MdJQ1Um-5CRF90rszMEFXu1sApLmMgFGyY42ot3oyIRDTLOSeod_JxM19h8LeBNG_mwZwCI-z8f9D8MRLSbFHVpPWNr6j2pTtofxAMykvCFT1xVIY-5Ce0Zl1OkY40HKChWJ93EAwln5Qxz94waJ4z2I2i8T3rpS2i7RCetYsXuNIZ1VZfy1D_654IchPODWrRO_nJsfJzhosMXoXI9dXlz-OgaaMhtLzOVpmZROCNOthlftQMv5yge2xn9IaWNsTLL2e3HQI0Go8yy3otwsyHthDXHTGpPkbQOM9e1KIPSk5YZV-AfuRBYzObXj6H_ooxJDpUW2I9GDF0UYe9XpieLAJvw13xZ0NW2uYY_PHRntGD2-MJAFduUNCCvZwl1zPsQC1Yi-lJa3Vxqa799c7vHjCn_mM\",\"account\":{\"account_id\":\"49506983\",\"cell_phone\":\"(206) 673-6663\",\"csr_actor_id\":\"\",\"email\":\"weickenmeier.markus@gmail.com\",\"emergency_contact\":{\"first_name\":\"\",\"last_name\":\"\",\"phone\":\"\"},\"favorites\":null,\"first_name\":\"Markus\",\"home_address\":{\"address1\":\"1920 4th Avenue North\",\"address2\":\"\",\"city\":\"SEATTLE\",\"country\":\"USA\",\"state\":\"WA\",\"zip_code\":\"98109\"},\"home_phone\":\"(206) 673-6663\",\"is_commercial_account\":false,\"last_name\":\"Weickenmeier\",\"legacy_account\":false,\"subscribed_to_post_visit_emails\":true,\"newsletter_alerts\":false,\"newsletter_subscribed\":\"0001-01-01T00:00:00Z\",\"newsletter_unsubscribed\":\"0001-01-01T00:00:00Z\",\"passes\":[],\"phone_alerts\":false,\"profile_picture_id\":\"\",\"sms_alerts\":false,\"trip_preferences\":null,\"login_source\":\"\",\"registration_source\":\"\",\"redirect_url\":\"\",\"tenant_id\":\"\",\"mailing_address\":{\"address1\":\"\",\"address2\":\"\",\"city\":\"\",\"country\":\"\",\"state\":\"\",\"zip_code\":\"\"},\"vehicle_info\":{\"make\":\"\",\"model\":\"\",\"color\":\"\",\"license_state\":\"\",\"license_number\":\"\",\"is_international\":false,\"is_awd\":false,\"is_high_clearance\":false},\"is_anonymized\":false,\"anonymization_date\":\"0001-01-01T00:00:00Z\"},\"expiration\":\"2026-02-04T23:22:24Z\",\"is_guest\":false,\"refresh_id\":\"457f6f44-4dc4-4985-b17d-5651cce683e9\",\"prompt_mfa\":true}"
+  },
+  "session_storage": {
+    "geoip": "{\"city\":\"Redmond\",\"country_code\":\"US\",\"country_name\":\"United States\",\"geohash\":\"c23phyqy8yjv\",\"ip_addr\":\"2001:4898:80e8:9:15e2:468f:26a1:8b09\",\"latitude\":47.6722,\"longitude\":-122.1257,\"region_code\":\"WA\",\"region_name\":\"Washington\",\"zip\":\"98073\"}"
+  },
+  "logged_in": true,
+  "last_refresh": "2026-02-04T15:17:56.317788"
+}

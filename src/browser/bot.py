@@ -454,218 +454,263 @@ class RecGovBrowserBot:
         """
         Add a campsite to cart.
         
-        campsite_id can be either:
-        - A site name like "06", "A001", etc.
-        - An internal Recreation.gov campsite ID
+        Handles two Recreation.gov interfaces:
+        1. Availability grid page (with date cells to click)
+        2. Campsite detail page (with date picker)
         
         Returns True if successful.
         """
         logger.info(f"Adding campsite {campsite_id} to cart for {arrival} to {departure}...")
         
         try:
-            # Strategy 1: Find and click on a link to the site detail page
-            # On availability pages, site names are often links
-            site_link_selectors = [
-                f'a:has-text("Site {campsite_id}")',
-                f'a:has-text("{campsite_id}")',
-                f'a[href*="campsites"]:has-text("{campsite_id}")',
-            ]
+            # Take screenshot for debugging
+            await self.page.screenshot(path="add_to_cart_start.png")
             
-            site_link = None
-            for selector in site_link_selectors:
-                try:
-                    site_link = await self.page.query_selector(selector)
-                    if site_link:
-                        href = await site_link.get_attribute("href")
-                        if href and "campsites" in href:
-                            logger.info(f"Found site link: {href}")
-                            # Navigate to the campsite detail page
-                            await site_link.click()
-                            await self.page.wait_for_load_state("domcontentloaded")
-                            await asyncio.sleep(2)
-                            break
-                except:
-                    continue
+            # Check if we're on an availability grid page (has the grid table)
+            availability_grid = await self.page.query_selector('table[class*="availability"], .rec-availability-grid')
             
-            # Now we should be on the campsite detail page
-            # Set the dates using the date picker
-            arrival_str = arrival.strftime("%m/%d/%Y")
-            departure_str = departure.strftime("%m/%d/%Y")
-            logger.info(f"Setting dates: {arrival_str} to {departure_str}")
-            
-            # First, try to click on the date picker to open it
-            date_picker_triggers = [
-                'button[aria-label*="date"]',
-                'button[class*="date"]',
-                '[data-component="DateRange"]',
-                '.sarsa-date-picker-trigger',
-                'input[placeholder*="Date"]',
-                '.date-picker-trigger',
-            ]
-            
-            for trigger in date_picker_triggers:
-                try:
-                    picker = await self.page.query_selector(trigger)
-                    if picker and await picker.is_visible():
-                        logger.info(f"Clicking date picker trigger: {trigger}")
-                        await picker.click()
-                        await asyncio.sleep(1)
-                        break
-                except:
-                    continue
-            
-            # Try to find and fill date inputs
-            date_input_selectors = [
-                ('input[id*="start-date"]', 'input[id*="end-date"]'),
-                ('input[id*="arrival"]', 'input[id*="departure"]'),
-                ('input[name*="start"]', 'input[name*="end"]'),
-                ('input[placeholder*="Start"]', 'input[placeholder*="End"]'),
-                ('input[aria-label*="arrival"]', 'input[aria-label*="departure"]'),
-                ('input[aria-label*="Start"]', 'input[aria-label*="End"]'),
-            ]
-            
-            dates_set = False
-            for start_sel, end_sel in date_input_selectors:
-                try:
-                    start_input = await self.page.query_selector(start_sel)
-                    end_input = await self.page.query_selector(end_sel)
-                    if start_input and end_input:
-                        logger.info(f"Found date inputs: {start_sel}, {end_sel}")
-                        # Clear and fill start date
-                        await start_input.click()
-                        await asyncio.sleep(0.3)
-                        await start_input.fill("")
-                        await start_input.type(arrival_str, delay=50)
-                        await asyncio.sleep(0.5)
-                        
-                        # Clear and fill end date
-                        await end_input.click()
-                        await asyncio.sleep(0.3)
-                        await end_input.fill("")
-                        await end_input.type(departure_str, delay=50)
-                        await asyncio.sleep(0.5)
-                        
-                        # Press Enter or Tab to confirm
-                        await self.page.keyboard.press("Tab")
-                        await asyncio.sleep(1)
-                        dates_set = True
-                        break
-                except Exception as e:
-                    logger.debug(f"Date input error with {start_sel}: {e}")
-                    continue
-            
-            # If we couldn't fill inputs, try clicking on calendar dates directly
-            if not dates_set:
-                logger.info("Trying to click calendar dates directly")
-                # Look for the arrival date in the calendar
-                arrival_day = arrival.day
-                arrival_month = arrival.strftime("%B")
+            if availability_grid:
+                # === AVAILABILITY GRID INTERFACE ===
+                logger.info("Detected availability grid interface")
+                return await self._add_to_cart_from_grid(campsite_id, arrival, departure)
+            else:
+                # === CAMPSITE DETAIL PAGE INTERFACE ===
+                logger.info("Using campsite detail page interface")
+                return await self._add_to_cart_from_detail_page(campsite_id, arrival, departure)
                 
-                # Try to find the date in a calendar view
-                date_cell_selectors = [
-                    f'button[aria-label*="{arrival_month}"][aria-label*="{arrival_day}"]',
-                    f'td[aria-label*="{arrival_day}"]',
-                    f'button:has-text("{arrival_day}")',
-                ]
-                
-                for selector in date_cell_selectors:
-                    try:
-                        cells = await self.page.query_selector_all(selector)
-                        if cells:
-                            await cells[0].click()
-                            await asyncio.sleep(0.5)
-                            dates_set = True
-                            break
-                    except:
-                        continue
-            
-            # Wait for availability to update after date selection
-            await asyncio.sleep(2)
-            
-            # Look for "Add to Cart" or "Book" button
-            add_button_selectors = [
-                'button:has-text("Add to Cart")',
-                'button:has-text("Book Now")',
-                'button:has-text("Book")',
-                'button:has-text("Reserve")',
-                'a:has-text("Add to Cart")',
-                'a:has-text("Book")',
-            ]
-            
-            add_button = None
-            for selector in add_button_selectors:
-                try:
-                    add_button = await self.page.query_selector(selector)
-                    if add_button and await add_button.is_visible():
-                        logger.info(f"Found add button with selector: {selector}")
-                        break
-                    add_button = None
-                except:
-                    continue
-            
-            if not add_button:
-                logger.warning("Add to Cart button not found")
-                # Take a screenshot for debugging
-                try:
-                    await self.page.screenshot(path="debug_screenshot.png")
-                    logger.info("Saved debug screenshot to debug_screenshot.png")
-                except:
-                    pass
-                return False
-            
-            # Check if button is enabled - wait a bit for it to become enabled
-            for _ in range(10):
-                is_disabled = await add_button.get_attribute("disabled")
-                if not is_disabled:
-                    break
-                await asyncio.sleep(0.5)
-            
-            if is_disabled:
-                logger.warning("Add to Cart button is disabled - dates may not be available")
-                return False
-            
-            # Click the button
-            await add_button.click()
-            
-            # Wait for response
-            await asyncio.sleep(2)
-            
-            # Check for CAPTCHA
-            if await self._check_captcha():
-                await self._handle_captcha()
-            
-            # Check if item was added (look for cart indicator or success message)
-            success_indicators = [
-                '.cart-count:not(:empty)',
-                'text="Added to Cart"',
-                'text="Item added"',
-            ]
-            
-            for selector in success_indicators:
-                try:
-                    element = await self.page.wait_for_selector(selector, timeout=5000)
-                    if element:
-                        logger.info("Successfully added to cart!")
-                        return True
-                except:
-                    continue
-            
-            # Check for error message
-            error = await self.page.query_selector('.error-message, .alert-danger')
-            if error:
-                error_text = await error.text_content()
-                logger.warning(f"Add to cart failed: {error_text}")
-                return False
-            
-            # Assume success if no error
-            return True
-            
         except PlaywrightTimeout:
             logger.error("Add to cart timed out")
             return False
         except Exception as e:
             logger.error(f"Add to cart error: {e}")
             return False
+    
+    async def _add_to_cart_from_grid(
+        self,
+        campsite_id: str,
+        arrival: date,
+        departure: date
+    ) -> bool:
+        """Add to cart from availability grid interface"""
+        
+        # Step 1: Set dates in the date picker at the top
+        arrival_str = arrival.strftime("%m/%d/%Y")
+        departure_str = departure.strftime("%m/%d/%Y")
+        logger.info(f"Setting dates in grid: {arrival_str} to {departure_str}")
+        
+        # Find and click the date picker area
+        date_picker_selectors = [
+            'input[placeholder*="mm/dd/yyyy"]',
+            'button:has([class*="calendar"])',
+            '.sarsa-date-range-picker',
+            '[class*="DatePickerInput"]',
+        ]
+        
+        date_inputs = await self.page.query_selector_all('input[placeholder*="mm/dd/yyyy"]')
+        if len(date_inputs) >= 2:
+            # Fill arrival date
+            logger.info("Found date range inputs, filling dates")
+            await date_inputs[0].click(click_count=3)
+            await self.page.keyboard.type(arrival_str, delay=30)
+            await asyncio.sleep(0.3)
+            
+            # Fill departure date  
+            await date_inputs[1].click(click_count=3)
+            await self.page.keyboard.type(departure_str, delay=30)
+            await asyncio.sleep(0.3)
+            
+            # Press Enter to apply dates
+            await self.page.keyboard.press("Enter")
+            await asyncio.sleep(2)
+        elif len(date_inputs) == 1:
+            # Single date range input - click to open calendar
+            await date_inputs[0].click()
+            await asyncio.sleep(1)
+        
+        # Step 2: Find the row for our campsite
+        site_row = await self.page.query_selector(f'tr:has(a:has-text("{campsite_id}"))')
+        if not site_row:
+            site_row = await self.page.query_selector(f'tr:has(td:has-text("{campsite_id}"))')
+        
+        if not site_row:
+            logger.warning(f"Could not find row for site {campsite_id}")
+            return False
+        
+        logger.info(f"Found row for site {campsite_id}")
+        
+        # Step 3: Click on available "A" cells in that row for our date range
+        # Get all cells with "A" (Available) in the site row
+        available_cells = await site_row.query_selector_all('button:has-text("A"), td:has-text("A") button, a:has-text("A")')
+        
+        if not available_cells:
+            logger.warning(f"No available dates found for site {campsite_id}")
+            return False
+        
+        logger.info(f"Found {len(available_cells)} available date cells")
+        
+        # Click on available cells (need to click each day we want to reserve)
+        num_nights = (departure - arrival).days
+        clicked = 0
+        
+        for cell in available_cells:
+            if clicked >= num_nights:
+                break
+            try:
+                if await cell.is_visible():
+                    await cell.click()
+                    clicked += 1
+                    await asyncio.sleep(0.3)
+            except:
+                continue
+        
+        if clicked == 0:
+            logger.warning("Could not click any available cells")
+            return False
+        
+        logger.info(f"Clicked {clicked} date cells")
+        await asyncio.sleep(1)
+        
+        # Step 4: Click Add to Cart button
+        return await self._click_add_to_cart()
+    
+    async def _add_to_cart_from_detail_page(
+        self,
+        campsite_id: str,
+        arrival: date,
+        departure: date
+    ) -> bool:
+        """Add to cart from campsite detail page interface"""
+        
+        arrival_str = arrival.strftime("%m/%d/%Y")
+        departure_str = departure.strftime("%m/%d/%Y")
+        
+        # Try date inputs
+        date_inputs = await self.page.query_selector_all('input[placeholder*="mm/dd/yyyy"]')
+        if len(date_inputs) >= 2:
+            logger.info("Found date inputs on detail page")
+            await date_inputs[0].click(click_count=3)
+            await self.page.keyboard.type(arrival_str, delay=30)
+            await date_inputs[1].click(click_count=3)
+            await self.page.keyboard.type(departure_str, delay=30)
+            await self.page.keyboard.press("Enter")
+            await asyncio.sleep(2)
+        
+        return await self._click_add_to_cart()
+    
+    async def _click_add_to_cart(self) -> bool:
+        """Click Add to Cart button and verify success"""
+        
+        # Look for "Add to Cart" or "Book" button
+        add_button_selectors = [
+            'button:has-text("Add to Cart")',
+            'button:has-text("Book Now")',
+            'button:has-text("Book")',
+            'button:has-text("Reserve")',
+            'a:has-text("Add to Cart")',
+            'a:has-text("Book")',
+        ]
+        
+        add_button = None
+        for selector in add_button_selectors:
+            try:
+                add_button = await self.page.query_selector(selector)
+                if add_button and await add_button.is_visible():
+                    logger.info(f"Found add button with selector: {selector}")
+                    break
+                add_button = None
+            except:
+                continue
+        
+        if not add_button:
+            logger.warning("Add to Cart button not found")
+            await self.page.screenshot(path="no_button.png")
+            return False
+        
+        # Wait for button to become enabled
+        for _ in range(10):
+            is_disabled = await add_button.get_attribute("disabled")
+            if not is_disabled:
+                break
+            await asyncio.sleep(0.5)
+        
+        if is_disabled:
+            logger.warning("Add to Cart button is disabled")
+            return False
+        
+        # Click the button
+        await add_button.click()
+        logger.info("Clicked Add to Cart button")
+        await asyncio.sleep(3)
+        
+        # Check for CAPTCHA
+        if await self._check_captcha():
+            await self._handle_captcha()
+        
+        # Check for success indicators
+        success_indicators = [
+            'text="Added to Cart"',
+            'text="Item added"',
+            'text="View Cart"',
+        ]
+        
+        for selector in success_indicators:
+            try:
+                element = await self.page.wait_for_selector(selector, timeout=3000)
+                if element:
+                    logger.info(f"Success indicator found: {selector}")
+                    return True
+            except:
+                continue
+        
+        # Check for error messages
+        error_selectors = [
+            '.error-message',
+            '.alert-danger',
+            'text="not available"',
+            'text="Select a date"',
+        ]
+        for selector in error_selectors:
+            try:
+                error = await self.page.query_selector(selector)
+                if error and await error.is_visible():
+                    error_text = await error.text_content()
+                    logger.warning(f"Add to cart failed: {error_text}")
+                    return False
+            except:
+                continue
+        
+        # VERIFY by navigating to cart
+        logger.info("Verifying cart contents...")
+        await self.page.goto(WebPages.cart())
+        await self.page.wait_for_load_state("domcontentloaded")
+        await asyncio.sleep(2)
+        
+        # Check if cart has items
+        cart_item_selectors = [
+            '.cart-item',
+            '[data-component="CartItem"]',
+            'text="Remove"',
+            'text="Checkout"',
+        ]
+        
+        for selector in cart_item_selectors:
+            try:
+                item = await self.page.query_selector(selector)
+                if item and await item.is_visible():
+                    logger.info(f"Cart item verified: {selector}")
+                    return True
+            except:
+                continue
+        
+        # Check for empty cart
+        empty = await self.page.query_selector('text="Your cart is empty"')
+        if empty and await empty.is_visible():
+            logger.warning("Cart is empty - add to cart failed")
+            await self.page.screenshot(path="cart_empty.png")
+            return False
+        
+        logger.warning("Could not verify cart - assuming failure")
+        return False
     
     async def navigate_to_cart(self):
         """Navigate to the shopping cart"""
